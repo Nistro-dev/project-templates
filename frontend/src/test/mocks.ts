@@ -1,6 +1,7 @@
 import { vi } from 'vitest'
 
 // Mock Zustand persist
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 vi.mock('zustand/middleware', () => ({
   persist: (config: any) => config,
 }))

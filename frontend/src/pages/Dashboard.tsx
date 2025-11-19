@@ -35,6 +35,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     loadFiles()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
