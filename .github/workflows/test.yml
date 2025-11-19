@@ -37,25 +37,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
+          cache: 'npm'
+          cache-dependency-path: './backend/package-lock.json'
 
       - name: Install dependencies
         working-directory: ./backend
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Generate Prisma client
         working-directory: ./backend
-        run: pnpm run db:generate
+        run: npm run db:generate
 
       - name: Run Prisma migrations
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
-        run: pnpm run db:migrate:prod
+        run: npm run db:migrate:prod
 
       - name: Run tests
         working-directory: ./backend
@@ -74,7 +71,7 @@ jobs:
           S3_SECRET_KEY: test
           FRONTEND_URL: http://localhost:5173
           API_URL: http://localhost:3000
-        run: pnpm run test:coverage
+        run: npm run test:coverage
 
   test-frontend:
     runs-on: ubuntu-latest
@@ -87,20 +84,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run lint
         working-directory: ./frontend
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Run tests
         working-directory: ./frontend
-        run: pnpm run test:coverage
+        run: npm run test:coverage
