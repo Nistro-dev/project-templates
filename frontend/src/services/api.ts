@@ -2,7 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/store/auth'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,7 +28,11 @@ api.interceptors.response.use(
       originalRequest._retry = true
 
       try {
-        const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true })
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`,
+          {},
+          { withCredentials: true }
+        )
         const { accessToken } = response.data
 
         useAuthStore.getState().setAccessToken(accessToken)

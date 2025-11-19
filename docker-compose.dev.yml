@@ -24,6 +24,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: https://${API_DOMAIN}/api
     container_name: ${PROJECT_NAME}_frontend_dev
     restart: always
     depends_on:
