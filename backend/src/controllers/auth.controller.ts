@@ -4,6 +4,8 @@ import {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from "../schemas/index.js";
 
 export const register = async (
@@ -115,4 +117,31 @@ export const me = async (
   }
 
   reply.send(user);
+};
+
+export const verifyEmail = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+): Promise<void> => {
+  const { token } = request.params as { token: string };
+  await authService.verifyEmail(token);
+  reply.send({ message: "Email vérifié avec succès" });
+};
+
+export const forgotPassword = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+): Promise<void> => {
+  const data = forgotPasswordSchema.parse(request.body);
+  await authService.forgotPassword(data.email);
+  reply.send({ message: "Email envoyé si le compte existe" });
+};
+
+export const resetPassword = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+): Promise<void> => {
+  const data = resetPasswordSchema.parse(request.body);
+  await authService.resetPassword(data.token, data.password);
+  reply.send({ message: "Mot de passe réinitialisé avec succès" });
 };

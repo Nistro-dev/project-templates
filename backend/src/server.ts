@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import cookie from "@fastify/cookie";
+import csrf from "@fastify/csrf-protection";
 import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
 import { env } from "./config/env.js";
@@ -25,7 +26,11 @@ const start = async (): Promise<void> => {
     });
 
     await fastify.register(cookie, {
-      secret: env.JWT_ACCESS_SECRET,
+      secret: env.COOKIE_SECRET,
+    });
+
+    await fastify.register(csrf, {
+      cookieOpts: { signed: true },
     });
 
     await fastify.register(multipart, {
@@ -34,9 +39,17 @@ const start = async (): Promise<void> => {
       },
     });
 
+    // Rate limiting global
     await fastify.register(rateLimit, {
       max: 100,
       timeWindow: "1 minute",
+      cache: 10000,
+      allowList: [],
+      redis: undefined, // Utiliser Redis pour production si disponible
+      skipOnError: false,
+      nameSpace: "global-",
+      continueExceeding: false,
+      enableDraftSpec: true,
     });
 
     fastify.setErrorHandler(errorHandler);

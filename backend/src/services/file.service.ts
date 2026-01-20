@@ -5,6 +5,7 @@ import {
   deleteFile,
   getSignedDownloadUrl,
   logger,
+  NotFoundError,
 } from "../utils/index.js";
 
 interface UploadedFile {
@@ -22,6 +23,13 @@ interface FileListItem {
   mimeType: string;
   size: number;
   createdAt: Date;
+}
+
+interface PaginatedFileList {
+  files: FileListItem[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
 export const upload = async (
@@ -58,20 +66,38 @@ export const upload = async (
   };
 };
 
-export const list = async (userId: string): Promise<FileListItem[]> => {
-  const files = await prisma.file.findMany({
-    where: { userId },
-    select: {
-      id: true,
-      filename: true,
-      mimeType: true,
-      size: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+export const list = async (
+  userId: string,
+  page: number = 1,
+  limit: number = 10
+): Promise<PaginatedFileList> => {
+  const skip = (page - 1) * limit;
 
-  return files;
+  const [files, total] = await Promise.all([
+    prisma.file.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        filename: true,
+        mimeType: true,
+        size: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.file.count({ where: { userId } }),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    files,
+    total,
+    page,
+    totalPages,
+  };
 };
 
 export const getDownloadUrl = async (
@@ -83,7 +109,7 @@ export const getDownloadUrl = async (
   });
 
   if (!file) {
-    throw { statusCode: 404, message: "File not found" };
+    throw new NotFoundError("Fichier introuvable");
   }
 
   return getSignedDownloadUrl(file.key);
@@ -95,7 +121,7 @@ export const remove = async (userId: string, fileId: string): Promise<void> => {
   });
 
   if (!file) {
-    throw { statusCode: 404, message: "File not found" };
+    throw new NotFoundError("Fichier introuvable");
   }
 
   await deleteFile(file.key);

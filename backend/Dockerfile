@@ -13,6 +13,9 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
+# Installer curl pour health check
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 

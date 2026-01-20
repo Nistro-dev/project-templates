@@ -1,5 +1,6 @@
 import api from './api'
 import type { User, LoginCredentials, RegisterCredentials } from '@/types'
+import type { UpdateProfileFormData } from '@/schemas'
 
 interface AuthResponse {
   user: User
@@ -29,5 +30,22 @@ export const authService = {
   async me(): Promise<User> {
     const response = await api.get<User>('/auth/me')
     return response.data
+  },
+
+  async forgotPassword(email: string): Promise<void> {
+    await api.post('/auth/forgot-password', { email })
+  },
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    await api.post('/auth/reset-password', { token, password })
+  },
+
+  async updateProfile(data: UpdateProfileFormData): Promise<User> {
+    const response = await api.patch<User>('/auth/profile', data)
+    return response.data
+  },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await api.post('/auth/change-password', { currentPassword, newPassword })
   },
 }

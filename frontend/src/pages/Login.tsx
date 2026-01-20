@@ -2,19 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { useAuth } from '@/hooks'
+import { loginSchema, type LoginFormData } from '@/schemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(1, 'Password is required'),
-})
-
-type LoginForm = z.infer<typeof loginSchema>
+import { Mail, Lock, Sparkles, ArrowRight } from 'lucide-react'
 
 export const Login = () => {
   const { login, isLoading } = useAuth()
@@ -23,66 +18,150 @@ export const Login = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<LoginForm>({
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
   })
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: LoginFormData) => {
     setError(null)
     try {
       await login(data)
-    } catch {
-      setError('Invalid email or password')
+    } catch (err: unknown) {
+      // Type guard pour vérifier si c'est une erreur Axios
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { status?: number; data?: { message?: string } } }
+        const status = axiosError.response?.status
+        const message = axiosError.response?.data?.message
+
+        if (status === 401) {
+          setError('Email ou mot de passe incorrect')
+        } else if (status === 403) {
+          setError('Votre compte a été désactivé')
+        } else if (status === 429) {
+          setError('Trop de tentatives. Veuillez réessayer plus tard')
+        } else if (message) {
+          setError(message)
+        } else {
+          setError('Une erreur est survenue lors de la connexion')
+        }
+      } else {
+        setError('Une erreur est survenue lors de la connexion')
+      }
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-premium px-4 py-12 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+      </div>
+
+      <Card className="w-full max-w-md glass backdrop-blur-xl border-white/30 shadow-2xl animate-scale-in relative z-10">
+        <CardHeader className="space-y-3 text-center pb-6">
+          <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow mb-2">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <CardTitle className="text-3xl font-bold font-display bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            Connexion
+          </CardTitle>
+          <CardDescription className="text-base text-gray-600">
+            Accédez à votre espace personnel
+          </CardDescription>
         </CardHeader>
+        
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             {error && (
-              <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+              <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-lg border border-destructive/20 animate-fade-in">
                 {error}
               </div>
             )}
+            
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                Adresse email
+              </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="vous@exemple.com"
+                icon={<Mail className="w-4 h-4" />}
+                error={errors.email?.message}
                 {...register('email')}
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                  Mot de passe
+                </Label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-primary hover:text-primary-600 font-medium transition-colors"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
+                placeholder="••••••••"
+                icon={<Lock className="w-4 h-4" />}
+                error={errors.password?.message}
                 {...register('password')}
               />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <Checkbox
+                id="remember"
+                label="Se souvenir de moi"
+                {...register('remember')}
+              />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
+
+          <CardFooter className="flex flex-col space-y-4 pt-2">
+            <Button
+              type="submit"
+              className="w-full group"
+              size="lg"
+              disabled={isLoading || isSubmitting}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Connexion en cours...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  Se connecter
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              )}
             </Button>
-            <p className="text-sm text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-primary hover:underline">
-                Register
+
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-2 text-gray-500">ou</span>
+              </div>
+            </div>
+
+            <p className="text-sm text-center text-gray-600">
+              Pas encore de compte ?{' '}
+              <Link
+                to="/register"
+                className="text-primary hover:text-primary-600 font-semibold transition-colors"
+              >
+                Créer un compte
               </Link>
             </p>
           </CardFooter>

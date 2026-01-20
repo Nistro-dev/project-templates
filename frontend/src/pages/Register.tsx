@@ -2,21 +2,30 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { useAuth } from '@/hooks'
+import { registerSchema, type RegisterFormData } from '@/schemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Mail, Lock, User, Sparkles, ArrowRight } from 'lucide-react'
 
-const registerSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-})
+const getPasswordStrength = (password: string): { strength: number; label: string; color: string } => {
+  if (!password) return { strength: 0, label: '', color: '' }
+  
+  let strength = 0
+  if (password.length >= 8) strength++
+  if (password.length >= 12) strength++
+  if (/[A-Z]/.test(password)) strength++
+  if (/[a-z]/.test(password)) strength++
+  if (/[0-9]/.test(password)) strength++
+  if (/[^A-Za-z0-9]/.test(password)) strength++
 
-type RegisterForm = z.infer<typeof registerSchema>
+  if (strength <= 2) return { strength: 33, label: 'Faible', color: 'bg-red-500' }
+  if (strength <= 4) return { strength: 66, label: 'Moyen', color: 'bg-yellow-500' }
+  return { strength: 100, label: 'Fort', color: 'bg-green-500' }
+}
 
 export const Register = () => {
   const { register: registerUser, isLoading } = useAuth()
@@ -25,88 +34,221 @@ export const Register = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterForm>({
+    formState: { errors, isSubmitting },
+    watch,
+  } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onBlur',
   })
 
-  const onSubmit = async (data: RegisterForm) => {
+  const passwordStrength = getPasswordStrength(watch('password') || '')
+
+  const onSubmit = async (data: RegisterFormData) => {
     setError(null)
     try {
-      await registerUser(data)
-    } catch {
-      setError('Registration failed. Email might already be in use.')
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword, acceptTerms, ...registerData } = data
+      await registerUser(registerData)
+    } catch (err: unknown) {
+      // Type guard pour vérifier si c'est une erreur Axios
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { status?: number; data?: { message?: string } } }
+        const status = axiosError.response?.status
+        const message = axiosError.response?.data?.message
+
+        if (status === 409) {
+          setError('Cet email est déjà utilisé')
+        } else if (status === 400) {
+          setError(message || 'Les données saisies sont invalides')
+        } else if (status === 429) {
+          setError('Trop de tentatives. Veuillez réessayer plus tard')
+        } else if (message) {
+          setError(message)
+        } else {
+          setError('Une erreur est survenue lors de l\'inscription')
+        }
+      } else {
+        setError('Une erreur est survenue lors de l\'inscription')
+      }
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Register</CardTitle>
-          <CardDescription>Create an account to get started</CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-premium px-4 py-12 relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-secondary-400/20 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+      </div>
+
+      <Card className="w-full max-w-2xl glass backdrop-blur-xl border-white/30 shadow-2xl animate-scale-in relative z-10">
+        <CardHeader className="space-y-3 text-center pb-6">
+          <div className="mx-auto w-16 h-16 bg-gradient-secondary rounded-2xl flex items-center justify-center shadow-glow-pink mb-2">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <CardTitle className="text-3xl font-bold font-display bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            Créer un compte
+          </CardTitle>
+          <CardDescription className="text-base text-gray-600">
+            Rejoignez-nous et commencez dès maintenant
+          </CardDescription>
         </CardHeader>
+        
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             {error && (
-              <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+              <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-lg border border-destructive/20 animate-fade-in">
                 {error}
               </div>
             )}
-            <div className="grid grid-cols-2 gap-4">
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
+                <Label htmlFor="firstName" className="text-sm font-semibold text-gray-700">
+                  Prénom
+                </Label>
                 <Input
                   id="firstName"
+                  placeholder="Jean"
+                  icon={<User className="w-4 h-4" />}
+                  error={errors.firstName?.message}
                   {...register('firstName')}
                 />
-                {errors.firstName && (
-                  <p className="text-sm text-destructive">{errors.firstName.message}</p>
-                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last name</Label>
+                <Label htmlFor="lastName" className="text-sm font-semibold text-gray-700">
+                  Nom
+                </Label>
                 <Input
                   id="lastName"
+                  placeholder="Dupont"
+                  icon={<User className="w-4 h-4" />}
+                  error={errors.lastName?.message}
                   {...register('lastName')}
                 />
-                {errors.lastName && (
-                  <p className="text-sm text-destructive">{errors.lastName.message}</p>
-                )}
               </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                Adresse email
+              </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="vous@exemple.com"
+                icon={<Mail className="w-4 h-4" />}
+                error={errors.email?.message}
                 {...register('email')}
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                Mot de passe
+              </Label>
               <Input
                 id="password"
                 type="password"
+                placeholder="••••••••"
+                icon={<Lock className="w-4 h-4" />}
+                error={errors.password?.message}
                 {...register('password')}
               />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+              {watch('password') && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">Force du mot de passe</span>
+                    <span className={`font-semibold ${passwordStrength.color.replace('bg-', 'text-')}`}>
+                      {passwordStrength.label}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${passwordStrength.color} transition-all duration-500`}
+                      style={{ width: `${passwordStrength.strength}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700">
+                Confirmer le mot de passe
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                icon={<Lock className="w-4 h-4" />}
+                error={errors.confirmPassword?.message}
+                {...register('confirmPassword')}
+              />
+            </div>
+
+            <div className="pt-2">
+              <Checkbox
+                id="acceptTerms"
+                label={
+                  <span className="text-sm text-gray-600">
+                    J'accepte les{' '}
+                    <Link to="/terms" className="text-primary hover:text-primary-600 font-medium">
+                      conditions d'utilisation
+                    </Link>
+                    {' '}et la{' '}
+                    <Link to="/privacy" className="text-primary hover:text-primary-600 font-medium">
+                      politique de confidentialité
+                    </Link>
+                  </span>
+                }
+                {...register('acceptTerms')}
+              />
+              {errors.acceptTerms && (
+                <p className="text-xs text-destructive font-medium mt-1 ml-7">
+                  {errors.acceptTerms.message}
+                </p>
               )}
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create account'}
+
+          <CardFooter className="flex flex-col space-y-4 pt-2">
+            <Button
+              type="submit"
+              className="w-full group"
+              size="lg"
+              variant="secondary"
+              disabled={isLoading || isSubmitting}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Création en cours...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  Créer mon compte
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              )}
             </Button>
-            <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <Link to="/login" className="text-primary hover:underline">
-                Login
+
+            <div className="relative w-full">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-2 text-gray-500">ou</span>
+              </div>
+            </div>
+
+            <p className="text-sm text-center text-gray-600">
+              Déjà un compte ?{' '}
+              <Link
+                to="/login"
+                className="text-primary hover:text-primary-600 font-semibold transition-colors"
+              >
+                Se connecter
               </Link>
             </p>
           </CardFooter>

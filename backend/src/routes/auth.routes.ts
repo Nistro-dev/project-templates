@@ -18,4 +18,10 @@ export const authRoutes = async (fastify: FastifyInstance): Promise<void> => {
   );
 
   fastify.get("/me", { preHandler: [authMiddleware] }, authController.me);
+
+  fastify.post("/verify-email/:token", authController.verifyEmail);
+
+  fastify.post("/forgot-password", authController.forgotPassword);
+
+  fastify.post("/reset-password", authController.resetPassword);
 };

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { logger } from '../src/utils/logger.js'
 
 const prisma = new PrismaClient()
 
@@ -17,12 +18,12 @@ async function main(): Promise<void> {
     },
   })
 
-  console.log('Seed completed')
+  logger.info('Seed completed')
 }
 
 main()
   .catch((e) => {
-    console.error(e)
+    logger.error({ error: e }, 'Seed failed')
     process.exit(1)
   })
   .finally(async () => {
