@@ -1,9 +1,6 @@
-FROM node:20-slim AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
-
-# Installer OpenSSL pour Prisma
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -16,8 +13,8 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
-# Installer curl pour health check
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Installer curl et openssl
+RUN apt-get update && apt-get install -y curl openssl && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
