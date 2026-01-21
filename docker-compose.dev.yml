@@ -62,11 +62,11 @@ services:
     image: redis:7-alpine
     container_name: ${PROJECT_NAME}_redis_dev
     restart: always
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server
     volumes:
       - ./data/redis:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
