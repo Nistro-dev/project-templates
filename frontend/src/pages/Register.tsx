@@ -74,22 +74,22 @@ export const Register = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-premium px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4 py-12 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-secondary-400/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
       </div>
 
-      <Card className="w-full max-w-2xl glass backdrop-blur-xl border-white/30 shadow-2xl animate-scale-in relative z-10">
+      <Card className="w-full max-w-2xl glass-strong backdrop-blur-2xl border-white/10 shadow-2xl animate-scale-in relative z-10">
         <CardHeader className="space-y-3 text-center pb-6">
-          <div className="mx-auto w-16 h-16 bg-gradient-secondary rounded-2xl flex items-center justify-center shadow-glow-pink mb-2">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center glow-pink mb-2">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-3xl font-bold font-display bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+          <CardTitle className="text-3xl font-bold font-display text-gradient">
             Créer un compte
           </CardTitle>
-          <CardDescription className="text-base text-gray-600">
+          <CardDescription className="text-base text-gray-400">
             Rejoignez-nous et commencez dès maintenant
           </CardDescription>
         </CardHeader>
@@ -97,14 +97,14 @@ export const Register = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-5">
             {error && (
-              <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-lg border border-destructive/20 animate-fade-in">
+              <div className="bg-red-500/10 text-red-400 text-sm p-4 rounded-lg border border-red-500/20 animate-fade-in">
                 {error}
               </div>
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="firstName" className="text-sm font-semibold text-gray-300">
                   Prénom
                 </Label>
                 <Input
@@ -116,7 +116,7 @@ export const Register = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="lastName" className="text-sm font-semibold text-gray-300">
                   Nom
                 </Label>
                 <Input
@@ -130,7 +130,7 @@ export const Register = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-300">
                 Adresse email
               </Label>
               <Input
@@ -144,7 +144,7 @@ export const Register = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="password" className="text-sm font-semibold text-gray-300">
                 Mot de passe
               </Label>
               <Input
@@ -158,12 +158,12 @@ export const Register = () => {
               {watch('password') && (
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">Force du mot de passe</span>
+                    <span className="text-gray-400">Force du mot de passe</span>
                     <span className={`font-semibold ${passwordStrength.color.replace('bg-', 'text-')}`}>
                       {passwordStrength.label}
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${passwordStrength.color} transition-all duration-500`}
                       style={{ width: `${passwordStrength.strength}%` }}
@@ -174,7 +174,7 @@ export const Register = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-300">
                 Confirmer le mot de passe
               </Label>
               <Input
@@ -191,13 +191,13 @@ export const Register = () => {
               <Checkbox
                 id="acceptTerms"
                 label={
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-400">
                     J'accepte les{' '}
-                    <Link to="/terms" className="text-primary hover:text-primary-600 font-medium">
+                    <Link to="/terms" className="text-purple-400 hover:text-purple-300 font-medium">
                       conditions d'utilisation
                     </Link>
                     {' '}et la{' '}
-                    <Link to="/privacy" className="text-primary hover:text-primary-600 font-medium">
+                    <Link to="/privacy" className="text-purple-400 hover:text-purple-300 font-medium">
                       politique de confidentialité
                     </Link>
                   </span>
@@ -205,7 +205,7 @@ export const Register = () => {
                 {...register('acceptTerms')}
               />
               {errors.acceptTerms && (
-                <p className="text-xs text-destructive font-medium mt-1 ml-7">
+                <p className="text-xs text-red-400 font-medium mt-1 ml-7">
                   {errors.acceptTerms.message}
                 </p>
               )}
@@ -215,9 +215,8 @@ export const Register = () => {
           <CardFooter className="flex flex-col space-y-4 pt-2">
             <Button
               type="submit"
-              className="w-full group"
+              className="w-full group bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
               size="lg"
-              variant="secondary"
               disabled={isLoading || isSubmitting}
             >
               {isLoading ? (
@@ -235,18 +234,18 @@ export const Register = () => {
 
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-800" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-2 text-gray-500">ou</span>
+                <span className="bg-[#0f0f0f] px-2 text-gray-500">ou</span>
               </div>
             </div>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-gray-400">
               Déjà un compte ?{' '}
               <Link
                 to="/login"
-                className="text-primary hover:text-primary-600 font-semibold transition-colors"
+                className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
               >
                 Se connecter
               </Link>

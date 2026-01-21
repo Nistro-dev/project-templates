@@ -53,22 +53,22 @@ export const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-premium px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4 py-12 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
       </div>
 
-      <Card className="w-full max-w-md glass backdrop-blur-xl border-white/30 shadow-2xl animate-scale-in relative z-10">
+      <Card className="w-full max-w-md glass-strong backdrop-blur-2xl border-white/10 shadow-2xl animate-scale-in relative z-10">
         <CardHeader className="space-y-3 text-center pb-6">
-          <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow mb-2">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center glow mb-2">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-3xl font-bold font-display bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+          <CardTitle className="text-3xl font-bold font-display text-gradient">
             Connexion
           </CardTitle>
-          <CardDescription className="text-base text-gray-600">
+          <CardDescription className="text-base text-gray-400">
             Accédez à votre espace personnel
           </CardDescription>
         </CardHeader>
@@ -76,13 +76,13 @@ export const Login = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-5">
             {error && (
-              <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-lg border border-destructive/20 animate-fade-in">
+              <div className="bg-red-500/10 text-red-400 text-sm p-4 rounded-lg border border-red-500/20 animate-fade-in">
                 {error}
               </div>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-300">
                 Adresse email
               </Label>
               <Input
@@ -97,12 +97,12 @@ export const Login = () => {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                <Label htmlFor="password" className="text-sm font-semibold text-gray-300">
                   Mot de passe
                 </Label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-primary hover:text-primary-600 font-medium transition-colors"
+                  className="text-xs text-purple-400 hover:text-purple-300 font-medium transition-colors"
                 >
                   Mot de passe oublié ?
                 </Link>
@@ -129,7 +129,7 @@ export const Login = () => {
           <CardFooter className="flex flex-col space-y-4 pt-2">
             <Button
               type="submit"
-              className="w-full group"
+              className="w-full group bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
               size="lg"
               disabled={isLoading || isSubmitting}
             >
@@ -148,18 +148,18 @@ export const Login = () => {
 
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-800" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-2 text-gray-500">ou</span>
+                <span className="bg-[#0f0f0f] px-2 text-gray-500">ou</span>
               </div>
             </div>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-gray-400">
               Pas encore de compte ?{' '}
               <Link
                 to="/register"
-                className="text-primary hover:text-primary-600 font-semibold transition-colors"
+                className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
               >
                 Créer un compte
               </Link>

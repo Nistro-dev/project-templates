@@ -6,48 +6,27 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 238 77% 67%;
+    /* Dark Minimalist - Style par défaut */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 280 100% 70%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 270 95% 75%;
+    --secondary: 330 81% 60%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 326 78% 60%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 280 100% 70%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 238 77% 67%;
+    --border: 0 0% 15%;
+    --input: 0 0% 12%;
+    --ring: 280 100% 70%;
     --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 238 77% 67%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 270 95% 75%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 326 78% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 238 77% 67%;
   }
 }
 
@@ -62,15 +41,15 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/10 backdrop-blur-md border border-white/20;
+    @apply bg-white/5 backdrop-blur-lg border border-white/10;
   }
   
-  .glass-dark {
-    @apply bg-black/10 backdrop-blur-md border border-black/20;
+  .glass-strong {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20;
   }
   
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-primary;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600;
   }
   
   .hover-lift {
@@ -79,5 +58,13 @@
   
   .smooth-transition {
     @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .glow {
+    @apply shadow-[0_0_30px_rgba(168,85,247,0.4)];
+  }
+  
+  .glow-pink {
+    @apply shadow-[0_0_30px_rgba(236,72,153,0.4)];
   }
 }

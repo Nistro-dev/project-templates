@@ -127,11 +127,11 @@ export const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50/20">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="container mx-auto px-4 lg:px-8 py-8 max-w-4xl">
         <div className="mb-6">
           <Link to="/dashboard">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour au tableau de bord
             </Button>
@@ -140,29 +140,29 @@ export const Profile = () => {
 
         <div className="space-y-6">
           {/* Profile Information */}
-          <Card className="animate-fade-in-up">
+          <Card className="animate-fade-in-up glass border-white/10">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center glow">
                   <User className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-bold">Informations du profil</CardTitle>
-                  <CardDescription>Mettez à jour vos informations personnelles</CardDescription>
+                  <CardTitle className="text-xl font-bold text-white">Informations du profil</CardTitle>
+                  <CardDescription className="text-gray-400">Mettez à jour vos informations personnelles</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <form onSubmit={handleSubmitProfile(onSubmitProfile)}>
               <CardContent className="space-y-5">
                 {profileError && (
-                  <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-lg border border-destructive/20 animate-fade-in">
+                  <div className="bg-red-500/10 text-red-400 text-sm p-4 rounded-lg border border-red-500/20 animate-fade-in">
                     {profileError}
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-sm font-semibold text-gray-700">
+                    <Label htmlFor="firstName" className="text-sm font-semibold text-gray-300">
                       Prénom
                     </Label>
                     <Input
@@ -175,7 +175,7 @@ export const Profile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-sm font-semibold text-gray-700">
+                    <Label htmlFor="lastName" className="text-sm font-semibold text-gray-300">
                       Nom
                     </Label>
                     <Input
@@ -190,7 +190,7 @@ export const Profile = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                  <Label htmlFor="email" className="text-sm font-semibold text-gray-300">
                     Adresse email
                   </Label>
                   <Input
@@ -228,28 +228,28 @@ export const Profile = () => {
           </Card>
 
           {/* Change Password */}
-          <Card className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <Card className="animate-fade-in-up glass border-white/10" style={{ animationDelay: '0.1s' }}>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-secondary rounded-xl flex items-center justify-center shadow-glow-pink">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center glow-pink">
                   <Lock className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-bold">Changer le mot de passe</CardTitle>
-                  <CardDescription>Assurez-vous de choisir un mot de passe sécurisé</CardDescription>
+                  <CardTitle className="text-xl font-bold text-white">Changer le mot de passe</CardTitle>
+                  <CardDescription className="text-gray-400">Assurez-vous de choisir un mot de passe sécurisé</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <form onSubmit={handleSubmitPassword(onSubmitPassword)}>
               <CardContent className="space-y-5">
                 {passwordError && (
-                  <div className="bg-destructive/10 text-destructive text-sm p-4 rounded-lg border border-destructive/20 animate-fade-in">
+                  <div className="bg-red-500/10 text-red-400 text-sm p-4 rounded-lg border border-red-500/20 animate-fade-in">
                     {passwordError}
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword" className="text-sm font-semibold text-gray-700">
+                  <Label htmlFor="currentPassword" className="text-sm font-semibold text-gray-300">
                     Mot de passe actuel
                   </Label>
                   <Input
@@ -264,7 +264,7 @@ export const Profile = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword" className="text-sm font-semibold text-gray-700">
+                  <Label htmlFor="newPassword" className="text-sm font-semibold text-gray-300">
                     Nouveau mot de passe
                   </Label>
                   <Input
@@ -279,12 +279,12 @@ export const Profile = () => {
                   {newPassword && (
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600">Force du mot de passe</span>
+                        <span className="text-gray-400">Force du mot de passe</span>
                         <span className={`font-semibold ${passwordStrength.color.replace('bg-', 'text-')}`}>
                           {passwordStrength.label}
                         </span>
                       </div>
-                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${passwordStrength.color} transition-all duration-500`}
                           style={{ width: `${passwordStrength.strength}%` }}
@@ -295,7 +295,7 @@ export const Profile = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmNewPassword" className="text-sm font-semibold text-gray-700">
+                  <Label htmlFor="confirmNewPassword" className="text-sm font-semibold text-gray-300">
                     Confirmer le nouveau mot de passe
                   </Label>
                   <Input

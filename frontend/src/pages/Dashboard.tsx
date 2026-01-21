@@ -110,28 +110,28 @@ export const Dashboard = () => {
   const totalSize = files.reduce((acc, file) => acc + file.size, 0)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50/20">
+    <div className="min-h-screen bg-[#0a0a0a]">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      <header className="glass-strong backdrop-blur-2xl border-b border-white/10 sticky top-0 z-40">
         <div className="container mx-auto px-4 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center glow">
                 <Files className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold font-display bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold font-display text-gradient">
                   Tableau de bord
                 </h1>
-                <p className="text-sm text-gray-500">Gérez vos fichiers</p>
+                <p className="text-sm text-gray-400">Gérez vos fichiers</p>
               </div>
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 hover:bg-gray-100 rounded-xl px-4 py-2 transition-all duration-300 hover-lift">
+                <button className="flex items-center gap-3 hover:bg-white/5 rounded-xl px-4 py-2 transition-all duration-300 hover-lift">
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-semibold text-gray-700">
+                    <p className="text-sm font-semibold text-gray-300">
                       {user?.firstName} {user?.lastName}
                     </p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
@@ -156,7 +156,7 @@ export const Dashboard = () => {
                   <span>Paramètres</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={logout} className="text-red-400 focus:text-red-400">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Déconnexion</span>
                 </DropdownMenuItem>
@@ -170,43 +170,43 @@ export const Dashboard = () => {
       <main className="container mx-auto px-4 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card hover className="animate-fade-in-up">
+          <Card hover className="animate-fade-in-up glass border-white/10">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center glow">
                   <FileText className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Total fichiers</p>
-                  <p className="text-2xl font-bold text-gray-900">{files.length}</p>
+                  <p className="text-sm text-gray-400 font-medium">Total fichiers</p>
+                  <p className="text-2xl font-bold text-white">{files.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card hover className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <Card hover className="animate-fade-in-up glass border-white/10" style={{ animationDelay: '0.1s' }}>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-success rounded-xl flex items-center justify-center shadow-md">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md">
                   <HardDrive className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Espace utilisé</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatFileSize(totalSize)}</p>
+                  <p className="text-sm text-gray-400 font-medium">Espace utilisé</p>
+                  <p className="text-2xl font-bold text-white">{formatFileSize(totalSize)}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card hover className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <Card hover className="animate-fade-in-up glass border-white/10" style={{ animationDelay: '0.2s' }}>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-secondary rounded-xl flex items-center justify-center shadow-glow-pink">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center glow-pink">
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Ce mois-ci</p>
-                  <p className="text-2xl font-bold text-gray-900">{files.length}</p>
+                  <p className="text-sm text-gray-400 font-medium">Ce mois-ci</p>
+                  <p className="text-2xl font-bold text-white">{files.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -214,10 +214,10 @@ export const Dashboard = () => {
         </div>
 
         {/* Upload Section */}
-        <Card className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+        <Card className="mb-8 animate-fade-in-up glass border-white/10" style={{ animationDelay: '0.3s' }}>
           <CardHeader>
-            <CardTitle className="text-xl font-bold">Télécharger un fichier</CardTitle>
-            <CardDescription>Glissez-déposez ou cliquez pour sélectionner</CardDescription>
+            <CardTitle className="text-xl font-bold text-white">Télécharger un fichier</CardTitle>
+            <CardDescription className="text-gray-400">Glissez-déposez ou cliquez pour sélectionner</CardDescription>
           </CardHeader>
           <CardContent>
             <FileUpload onUpload={handleUpload} isUploading={isUploading} />
@@ -225,12 +225,12 @@ export const Dashboard = () => {
         </Card>
 
         {/* Files List */}
-        <Card className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+        <Card className="animate-fade-in-up glass border-white/10" style={{ animationDelay: '0.4s' }}>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl font-bold">Mes fichiers</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl font-bold text-white">Mes fichiers</CardTitle>
+                <CardDescription className="text-gray-400">
                   {files.length} fichier{files.length !== 1 ? 's' : ''} au total
                 </CardDescription>
               </div>
@@ -243,10 +243,10 @@ export const Dashboard = () => {
               </div>
             ) : files.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-10 h-10 text-gray-400" />
+                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-10 h-10 text-gray-500" />
                 </div>
-                <p className="text-lg font-semibold text-gray-700 mb-2">Aucun fichier</p>
+                <p className="text-lg font-semibold text-gray-300 mb-2">Aucun fichier</p>
                 <p className="text-sm text-gray-500">Commencez par télécharger votre premier fichier</p>
               </div>
             ) : (
@@ -254,15 +254,15 @@ export const Dashboard = () => {
                 {files.map((file, index) => (
                   <div
                     key={file.id}
-                    className="group flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 hover:border-primary hover:bg-primary-50/50 transition-all duration-300 hover-lift animate-fade-in"
+                    className="group flex items-center justify-between p-4 rounded-xl glass border-white/10 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 hover-lift animate-fade-in"
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
                         <FileText className="w-6 h-6 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
+                        <p className="font-semibold text-gray-200 truncate group-hover:text-purple-400 transition-colors">
                           {file.filename}
                         </p>
                         <div className="flex items-center gap-3 text-sm text-gray-500">
@@ -277,7 +277,7 @@ export const Dashboard = () => {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDownload(file)}
-                        className="hover:bg-primary-100 hover:text-primary"
+                        className="hover:bg-purple-500/20 hover:text-purple-400"
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -285,7 +285,7 @@ export const Dashboard = () => {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(file)}
-                        className="hover:bg-destructive/10 hover:text-destructive"
+                        className="hover:bg-red-500/20 hover:text-red-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
