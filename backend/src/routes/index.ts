@@ -1,8 +1,7 @@
 import { FastifyInstance } from "fastify";
-import { registerV1Routes } from "./v1/index.js";
+import { healthRoutes } from "./health.routes.js";
 
-export const registerRoutes = async (
-  fastify: FastifyInstance
-): Promise<void> => {
-  fastify.register(registerV1Routes, { prefix: "/api/v1" });
-};
+export async function registerRoutes(fastify: FastifyInstance) {
+  // Health check route (no /api prefix)
+  await fastify.register(healthRoutes);
+}

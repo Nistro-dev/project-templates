@@ -13,16 +13,13 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
-# Installer curl et openssl
-RUN apt-get update && apt-get install -y curl openssl && rm -rf /var/lib/apt/lists/*
+# Install wget for healthcheck
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
-
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/generated ./src/generated
-COPY prisma ./prisma
-COPY prisma.config.ts ./
+COPY --from=builder /app/prisma ./prisma
 COPY docker-entrypoint.sh ./
 
 RUN chmod +x docker-entrypoint.sh

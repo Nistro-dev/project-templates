@@ -1,82 +1,167 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
-import cookie from "@fastify/cookie";
-import csrf from "@fastify/csrf-protection";
-import multipart from "@fastify/multipart";
-import rateLimit from "@fastify/rate-limit";
 import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
-import { errorHandler } from "./middlewares/errorHandler.js";
 import { registerRoutes } from "./routes/index.js";
+import { errorHandler } from "./middlewares/error-handler.js";
 
 const fastify = Fastify({
-  logger: false,
+  logger: false, // We use pino directly
+  trustProxy: true, // Trust reverse proxy (nginx)
 });
 
-const start = async (): Promise<void> => {
+async function start() {
   try {
+    // ============================
+    // SECURITY PLUGINS
+    // ============================
+
+    // CORS - Only allow requests from frontend
     await fastify.register(cors, {
-      origin: [env.FRONTEND_URL],
+      origin: env.FRONTEND_URL,
       credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     });
 
+    // Helmet - Security headers
     await fastify.register(helmet, {
-      contentSecurityPolicy: false,
-    });
-
-    await fastify.register(cookie, {
-      secret: env.COOKIE_SECRET,
-    });
-
-    await fastify.register(csrf, {
-      cookieOpts: { signed: true },
-    });
-
-    await fastify.register(multipart, {
-      limits: {
-        fileSize: 10 * 1024 * 1024,
+      // Content Security Policy
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", "data:", "https:"],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          frameAncestors: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
       },
+      // Strict Transport Security (HSTS)
+      strictTransportSecurity: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true,
+      },
+      // X-Frame-Options
+      frameguard: { action: "deny" },
+      // X-Content-Type-Options
+      contentTypeOptions: true,
+      // X-XSS-Protection
+      xssFilter: true,
+      // Referrer Policy
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+      // Cross-Origin-Embedder-Policy
+      crossOriginEmbedderPolicy: false, // Can cause issues with external resources
+      // Cross-Origin-Opener-Policy
+      crossOriginOpenerPolicy: { policy: "same-origin" },
+      // Cross-Origin-Resource-Policy
+      crossOriginResourcePolicy: { policy: "same-origin" },
+      // DNS Prefetch Control
+      dnsPrefetchControl: { allow: false },
+      // Hide X-Powered-By
+      hidePoweredBy: true,
+      // IE No Open
+      ieNoOpen: true,
+      // No Sniff
+      noSniff: true,
+      // Origin Agent Cluster
+      originAgentCluster: true,
+      // Permitted Cross-Domain-Policies
+      permittedCrossDomainPolicies: { permittedPolicies: "none" },
     });
 
-    // Rate limiting global
-    await fastify.register(rateLimit, {
-      max: 100,
-      timeWindow: "1 minute",
-      cache: 10000,
-      allowList: [],
-      redis: undefined, // Utiliser Redis pour production si disponible
-      skipOnError: false,
-      nameSpace: "global-",
-      continueExceeding: false,
-      enableDraftSpec: true,
+    // ============================
+    // ADDITIONAL SECURITY MEASURES
+    // ============================
+
+    // Add security headers manually for extra protection
+    fastify.addHook("onSend", async (_request, reply, _payload) => {
+      // Permissions Policy (formerly Feature-Policy)
+      reply.header(
+        "Permissions-Policy",
+        "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+      );
+      // Cache Control for sensitive endpoints
+      reply.header("Cache-Control", "no-store, no-cache, must-revalidate");
+      reply.header("Pragma", "no-cache");
+      reply.header("Expires", "0");
     });
 
+    // Request validation - reject suspicious requests
+    fastify.addHook("onRequest", async (request, reply) => {
+      // Block requests with suspicious user agents
+      const userAgent = request.headers["user-agent"] || "";
+      const suspiciousPatterns = [
+        /sqlmap/i,
+        /nikto/i,
+        /nmap/i,
+        /masscan/i,
+        /zgrab/i,
+      ];
+
+      if (suspiciousPatterns.some((pattern) => pattern.test(userAgent))) {
+        logger.warn({ userAgent }, "Blocked suspicious user agent");
+        return reply.status(403).send({ error: "Forbidden" });
+      }
+
+      // Validate Content-Type for POST/PUT/PATCH requests
+      if (["POST", "PUT", "PATCH"].includes(request.method)) {
+        const contentType = request.headers["content-type"];
+        if (contentType && !contentType.includes("application/json")) {
+          // Allow multipart for file uploads if needed in the future
+          if (!contentType.includes("multipart/form-data")) {
+            return reply.status(415).send({ error: "Unsupported Media Type" });
+          }
+        }
+      }
+    });
+
+    // ============================
+    // ERROR HANDLER
+    // ============================
     fastify.setErrorHandler(errorHandler);
 
-    fastify.get("/health", async () => {
-      return { status: "ok", timestamp: new Date().toISOString() };
-    });
-
+    // ============================
+    // ROUTES
+    // ============================
     await registerRoutes(fastify);
 
+    // ============================
+    // START SERVER
+    // ============================
     await fastify.listen({ port: env.PORT, host: "0.0.0.0" });
-
     logger.info(`Server running on port ${env.PORT}`);
     logger.info(`Environment: ${env.NODE_ENV}`);
+    logger.info(`CORS origin: ${env.FRONTEND_URL}`);
   } catch (error) {
-    logger.error(error, "Failed to start server");
+    logger.fatal(error, "Failed to start server");
+    process.exit(1);
+  }
+}
+
+// Graceful shutdown
+const shutdown = async (signal: string) => {
+  logger.info(`Received ${signal}, shutting down gracefully...`);
+  try {
+    await fastify.close();
+    logger.info("Server closed");
+    process.exit(0);
+  } catch (error) {
+    logger.error(error, "Error during shutdown");
     process.exit(1);
   }
 };
 
-const shutdown = async (): Promise<void> => {
-  logger.info("Shutting down server...");
-  await fastify.close();
-  process.exit(0);
-};
-
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 
 start();

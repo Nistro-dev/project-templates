@@ -7,44 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id                     String         @id @default(uuid())
-  email                  String         @unique
-  password               String
-  firstName              String
-  lastName               String
-  isActive               Boolean        @default(true)
-  emailVerified          Boolean        @default(false)
-  emailVerificationToken String?
-  passwordResetToken     String?
-  passwordResetExpires   DateTime?
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
-  refreshTokens          RefreshToken[]
-  files                  File[]
-}
-
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([token])
-}
-
-model File {
-  id        String   @id @default(uuid())
-  filename  String
-  mimeType  String
-  size      Int
-  key       String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-}
+// Add your models here
+// Example:
+// model User {
+//   id        String   @id @default(uuid())
+//   email     String   @unique
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }

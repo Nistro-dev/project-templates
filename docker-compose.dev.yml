@@ -1,3 +1,5 @@
+name: ${PROJECT_NAME}_dev
+
 services:
   backend:
     build:
@@ -5,33 +7,31 @@ services:
       dockerfile: Dockerfile
     container_name: ${PROJECT_NAME}_backend_dev
     restart: always
+    environment:
+      - NODE_ENV=development
     env_file:
       - ./backend/.env
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${PROJECT_NAME}-api-dev.rule=Host(`${API_DOMAIN}`)"
-      - "traefik.http.routers.${PROJECT_NAME}-api-dev.entrypoints=websecure"
-      - "traefik.http.routers.${PROJECT_NAME}-api-dev.tls.certresolver=letsencrypt"
-      - "traefik.http.services.${PROJECT_NAME}-api-dev.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
-      - web
       - internal
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        VITE_API_URL: https://${API_DOMAIN}/api
     container_name: ${PROJECT_NAME}_frontend_dev
     restart: always
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.${PROJECT_NAME}-dev.rule=Host(`${FRONTEND_DOMAIN}`)"
@@ -39,6 +39,7 @@ services:
       - "traefik.http.routers.${PROJECT_NAME}-dev.tls.certresolver=letsencrypt"
     networks:
       - web
+      - internal
 
   db:
     image: postgres:16-alpine
@@ -58,23 +59,9 @@ services:
     networks:
       - internal
 
-  redis:
-    image: redis:7-alpine
-    container_name: ${PROJECT_NAME}_redis_dev
-    restart: always
-    command: redis-server
-    volumes:
-      - ./data/redis:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - internal
-
 networks:
   web:
     external: true
   internal:
+    name: ${PROJECT_NAME}_dev_internal
     driver: bridge

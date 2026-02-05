@@ -1,3 +1,5 @@
+name: ${PROJECT_NAME}_prod
+
 services:
   backend:
     build:
@@ -5,35 +7,26 @@ services:
       dockerfile: Dockerfile
     container_name: ${PROJECT_NAME}_backend_prod
     restart: always
+    environment:
+      - NODE_ENV=production
     env_file:
       - ./backend/.env
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.${PROJECT_NAME}-api.rule=Host(`${API_DOMAIN}`)"
-      - "traefik.http.routers.${PROJECT_NAME}-api.entrypoints=websecure"
-      - "traefik.http.routers.${PROJECT_NAME}-api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.${PROJECT_NAME}-api.loadbalancer.server.port=3000"
     networks:
-      - web
       - internal
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        VITE_API_URL: https://${API_DOMAIN}/api
     container_name: ${PROJECT_NAME}_frontend_prod
     restart: always
     depends_on:
@@ -49,10 +42,11 @@ services:
       - "traefik.http.routers.${PROJECT_NAME}-www.tls.certresolver=letsencrypt"
       - "traefik.http.routers.${PROJECT_NAME}-www.middlewares=${PROJECT_NAME}-redirect"
       - "traefik.http.middlewares.${PROJECT_NAME}-redirect.redirectregex.regex=^https://www.${FRONTEND_DOMAIN}/(.*)"
-      - "traefik.http.middlewares.${PROJECT_NAME}-redirect.redirectregex.replacement=https://${FRONTEND_DOMAIN}/$${1}"
+      - "traefik.http.middlewares.${PROJECT_NAME}-redirect.redirectregex.replacement=https://${FRONTEND_DOMAIN}/$$1"
       - "traefik.http.middlewares.${PROJECT_NAME}-redirect.redirectregex.permanent=true"
     networks:
       - web
+      - internal
 
   db:
     image: postgres:16-alpine
@@ -72,23 +66,9 @@ services:
     networks:
       - internal
 
-  redis:
-    image: redis:7-alpine
-    container_name: ${PROJECT_NAME}_redis_prod
-    restart: always
-    command: redis-server
-    volumes:
-      - ./data/redis:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - internal
-
 networks:
   web:
     external: true
   internal:
+    name: ${PROJECT_NAME}_prod_internal
     driver: bridge
