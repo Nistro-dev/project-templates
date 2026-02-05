@@ -1,18 +1,44 @@
 import Fastify from "fastify";
+import crypto from "crypto";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
 import { registerRoutes } from "./routes/index.js";
 import { errorHandler } from "./middlewares/error-handler.js";
+import { reportCriticalError } from "./services/webhook.service.js";
 
 const fastify = Fastify({
   logger: false, // We use pino directly
   trustProxy: true, // Trust reverse proxy (nginx)
+  genReqId: () => crypto.randomUUID(), // Generate unique request IDs
 });
 
 async function start() {
   try {
+    // ============================
+    // REQUEST LOGGING
+    // ============================
+    fastify.addHook("onRequest", async (request) => {
+      request.log = logger.child({
+        requestId: request.id,
+        method: request.method,
+        url: request.url,
+        ip: request.ip,
+      });
+      request.log.info("Request started");
+    });
+
+    fastify.addHook("onResponse", async (request, reply) => {
+      request.log.info(
+        {
+          statusCode: reply.statusCode,
+          responseTime: reply.elapsedTime,
+        },
+        "Request completed"
+      );
+    });
+
     // ============================
     // SECURITY PLUGINS
     // ============================
@@ -141,9 +167,18 @@ async function start() {
     await fastify.listen({ port: env.PORT, host: "0.0.0.0" });
     logger.info(`Server running on port ${env.PORT}`);
     logger.info(`Environment: ${env.NODE_ENV}`);
+    logger.info(`Project: ${env.PROJECT_NAME}`);
     logger.info(`CORS origin: ${env.FRONTEND_URL}`);
+    if (env.LOG_WEBHOOK_URL) {
+      logger.info("Critical error webhook enabled");
+    }
   } catch (error) {
-    logger.fatal(error, "Failed to start server");
+    const err = error as Error;
+    logger.fatal(err, "Failed to start server");
+
+    // Report fatal startup error
+    await reportCriticalError("fatal", err.message, err.stack);
+
     process.exit(1);
   }
 }
@@ -156,10 +191,26 @@ const shutdown = async (signal: string) => {
     logger.info("Server closed");
     process.exit(0);
   } catch (error) {
-    logger.error(error, "Error during shutdown");
+    const err = error as Error;
+    logger.error(err, "Error during shutdown");
     process.exit(1);
   }
 };
+
+// Handle uncaught exceptions
+process.on("uncaughtException", async (error) => {
+  logger.fatal(error, "Uncaught exception");
+  await reportCriticalError("fatal", error.message, error.stack);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", async (reason) => {
+  const error = reason instanceof Error ? reason : new Error(String(reason));
+  logger.fatal(error, "Unhandled rejection");
+  await reportCriticalError("fatal", error.message, error.stack);
+  process.exit(1);
+});
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
