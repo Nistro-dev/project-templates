@@ -1,28 +1,11 @@
-import { PrismaClient } from "../generated/prisma/client.js";
-import { logger } from "./logger.js";
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: [
-      { emit: "event", level: "query" },
-      { emit: "event", level: "error" },
-      { emit: "event", level: "warn" },
-    ],
-  });
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
-
-prisma.$on("error" as never, (e: unknown) => {
-  logger.error(e, "Prisma error");
-});
-
-prisma.$on("warn" as never, (e: unknown) => {
-  logger.warn(e, "Prisma warning");
-});
