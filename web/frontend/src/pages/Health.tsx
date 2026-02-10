@@ -10,10 +10,10 @@ interface HealthCheck {
 }
 
 interface HealthResponse {
-  status: "healthy" | "unhealthy";
+  status: "healthy" | "unhealthy" | "ok";
   timestamp: string;
-  uptime: number;
-  checks: HealthCheck[];
+  uptime?: number;
+  checks?: HealthCheck[];
 }
 
 export function HealthPage() {
@@ -89,47 +89,51 @@ export function HealthPage() {
             <div className="space-y-4">
               {/* Overall Status */}
               <div className="flex items-center gap-3 pb-4 border-b">
-                {health.status === "healthy" ? (
+                {health.status === "healthy" || health.status === "ok" ? (
                   <CheckCircle className="h-8 w-8 text-green-500" />
                 ) : (
                   <XCircle className="h-8 w-8 text-destructive" />
                 )}
                 <div>
                   <p className="font-semibold capitalize">{health.status}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Uptime: {formatUptime(health.uptime)}
-                  </p>
+                  {health.uptime !== undefined && (
+                    <p className="text-sm text-muted-foreground">
+                      Uptime: {formatUptime(health.uptime)}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Individual Checks */}
-              <div className="space-y-3">
-                {health.checks.map((check) => (
-                  <div
-                    key={check.name}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      {check.status === "ok" ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-destructive" />
+              {health.checks && health.checks.length > 0 && (
+                <div className="space-y-3">
+                  {health.checks.map((check) => (
+                    <div
+                      key={check.name}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        {check.status === "ok" ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-destructive" />
+                        )}
+                        <span className="text-sm font-medium">{check.name}</span>
+                      </div>
+                      {check.latencyMs !== undefined && (
+                        <span className="text-xs text-muted-foreground">
+                          {check.latencyMs}ms
+                        </span>
                       )}
-                      <span className="text-sm font-medium">{check.name}</span>
+                      {check.error && (
+                        <span className="text-xs text-destructive">
+                          {check.error}
+                        </span>
+                      )}
                     </div>
-                    {check.latencyMs !== undefined && (
-                      <span className="text-xs text-muted-foreground">
-                        {check.latencyMs}ms
-                      </span>
-                    )}
-                    {check.error && (
-                      <span className="text-xs text-destructive">
-                        {check.error}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {/* Timestamp */}
               <p className="text-xs text-muted-foreground text-center pt-4 border-t">
